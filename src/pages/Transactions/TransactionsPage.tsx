@@ -1,79 +1,139 @@
 import { useEffect, useState } from "react";
-import { getTransactions } from "../../services/transactionService";
-import type { Transaction } from "../../services/transactionService";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+  createTransaction,
+  getTransactionById,
+  updateTransaction,
+  type Transaction,
+} from "../../services/transactionService";
 import {
   Box,
   Button,
+  MenuItem,
+  TextField,
   Typography,
   Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
   CircularProgress,
+  Stack,
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
 
 export default function TransactionsPage() {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { id } = useParams();
   const navigate = useNavigate();
 
+  const [form, setForm] = useState<Omit<Transaction, "id">>({
+    type: "INCOME",
+    amount: 0,
+    date: new Date().toISOString(),
+  });
+
+  const [loading, setLoading] = useState(false);
+
   useEffect(() => {
-    const load = async () => {
-      try {
-        const data = await getTransactions();
-        setTransactions(data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
+    if (id) {
+      setLoading(true);
+      getTransactionById(id)
+        .then((data) =>
+          setForm({
+            type: data.type,
+            amount: data.amount,
+            date: data.date,
+          })
+        )
+        .catch(console.error)
+        .finally(() => setLoading(false));
+    }
+  }, [id]);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+
+    setForm((prev) => ({
+      ...prev,
+      // Convierte a número si es el campo 'amount'
+      [name]: name === "amount" ? Number(value) : value,
+    }));
+  };
+
+  const handleSubmit = async () => {
+    try {
+      setLoading(true);
+
+      // Aseguramos que amount sea número al enviar
+      const payload = {
+        ...form,
+        amount: Number(form.amount),
+      };
+
+      if (id) {
+        await updateTransaction(id, payload);
+      } else {
+        await createTransaction(payload);
       }
-    };
-    load();
-  }, []);
+      navigate("/transactions");
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (loading) return <CircularProgress />;
 
   return (
     <Box p={3}>
-      <Typography variant="h4" mb={2}>
-        Mis Transacciones
+      <Typography variant="h5" mb={2}>
+        {id ? "Editar Transacción" : "Nueva Transacción"}
       </Typography>
+      <Paper sx={{ p: 3, maxWidth: 400 }}>
+        <TextField
+          select
+          fullWidth
+          label="Tipo"
+          name="type"
+          value={form.type}
+          onChange={handleChange}
+          margin="normal"
+        >
+          <MenuItem value="INCOME">Ingreso</MenuItem>
+          <MenuItem value="EXPENSE">Gasto</MenuItem>
+        </TextField>
 
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={() => navigate("/transactions/new")}
-        sx={{ mb: 2 }}
-      >
-        Nueva Transacción
-      </Button>
+        <TextField
+          fullWidth
+          type="number"
+          label="Monto"
+          name="amount"
+          value={form.amount}
+          onChange={handleChange}
+          margin="normal"
+        />
 
-      <Paper>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Tipo</TableCell>
-              <TableCell>Monto</TableCell>
-              <TableCell>Fecha</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {transactions.map((t) => (
-              <TableRow key={t.id}>
-                <TableCell>
-                  {t.type === "INCOME" ? "Ingreso" : "Gasto"}
-                </TableCell>
-                <TableCell>${t.amount.toFixed(2)}</TableCell>
-                <TableCell>
-                  {new Date(t.date).toLocaleDateString()}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        <TextField
+          fullWidth
+          type="date"
+          label="Fecha"
+          name="date"
+          value={form.date.split("T")[0]}
+          onChange={handleChange}
+          margin="normal"
+          InputLabelProps={{ shrink: true }}
+        />
+
+        <Stack direction="row" spacing={2} mt={2}>
+          <Button variant="contained" color="primary" onClick={handleSubmit}>
+            Guardar
+          </Button>
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={() => navigate("/transactions")}
+          >
+            Cancelar
+          </Button>
+        </Stack>
       </Paper>
     </Box>
   );

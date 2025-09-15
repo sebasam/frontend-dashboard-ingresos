@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getTransactions, type Transaction } from "../../services/transactionService";
+import { getTransactions, deleteTransaction, type Transaction } from "../../services/transactionService";
 import {
   Box,
   Button,
@@ -11,6 +11,7 @@ import {
   TableHead,
   TableRow,
   CircularProgress,
+  Stack,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
@@ -19,20 +20,32 @@ export default function TransactionsList() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  const loadTransactions = async () => {
+    setLoading(true);
+    try {
+      const data = await getTransactions({ perPage: 1000 });
+      setTransactions(Array.isArray(data.items) ? data.items : []);
+    } catch (err) {
+      console.error("Error cargando transacciones:", err);
+      setTransactions([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const load = async () => {
-      try {
-        const data = await getTransactions({ perPage: 1000 });
-        setTransactions(Array.isArray(data.items) ? data.items : []);
-      } catch (err) {
-        console.error("Error cargando transacciones:", err);
-        setTransactions([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
+    loadTransactions();
   }, []);
+
+  const handleDelete = async (id: number | string) => {
+    if (!confirm("¿Estás seguro de que deseas eliminar esta transacción?")) return;
+    try {
+      await deleteTransaction(id);
+      loadTransactions(); // recarga la lista
+    } catch (err) {
+      console.error("Error eliminando la transacción:", err);
+    }
+  };
 
   if (loading)
     return (
@@ -63,24 +76,41 @@ export default function TransactionsList() {
               <TableCell>Tipo</TableCell>
               <TableCell>Monto</TableCell>
               <TableCell>Fecha</TableCell>
+              <TableCell align="center">Acciones</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {transactions.length > 0 ? (
               transactions.map((t) => (
-                <TableRow
-                  key={t.id}
-                  onClick={() => navigate(`/transactions/${t.id}/edit`)}
-                  sx={{ cursor: "pointer" }}
-                >
+                <TableRow key={t.id}>
                   <TableCell>{t.type === "INCOME" ? "Ingreso" : "Gasto"}</TableCell>
                   <TableCell>${t.amount.toFixed(2)}</TableCell>
                   <TableCell>{new Date(t.date).toLocaleDateString()}</TableCell>
+                  <TableCell align="center">
+                    <Stack direction="row" spacing={1} justifyContent="center">
+                      <Button
+                        variant="outlined"
+                        color="primary"
+                        size="small"
+                        onClick={() => navigate(`/transactions/${t.id}/edit`)}
+                      >
+                        Editar
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        color="error"
+                        size="small"
+                        onClick={() => handleDelete(t.id)}
+                      >
+                        Eliminar
+                      </Button>
+                    </Stack>
+                  </TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={3} align="center">
+                <TableCell colSpan={4} align="center">
                   No hay transacciones
                 </TableCell>
               </TableRow>

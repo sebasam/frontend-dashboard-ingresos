@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
-import { getTransactions, type Transaction } from "../../services/transactionService";
+import { getTransactions, type TransactionResponse, type Transaction } from "../../services/transactionService";
 import {
   Box,
   Typography,
   CircularProgress,
   Paper,
+  Button,
+  Stack,
 } from "@mui/material";
 import {
   PieChart,
@@ -17,6 +19,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import api from "../../api/axios";
 
 const COLORS = ["#4caf50", "#f44336"];
 
@@ -25,12 +28,43 @@ export default function Reports() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getTransactions()
-      .then(setTransactions)
-      .finally(() => setLoading(false));
+    const load = async () => {
+      try {
+        const data: TransactionResponse = await getTransactions({ perPage: 1000 });
+        setTransactions(Array.isArray(data.items) ? data.items : []);
+      } catch (err) {
+        console.error(err);
+        setTransactions([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
   }, []);
 
-  if (loading) return <CircularProgress />;
+  const handleDownloadCsv = async () => {
+    try {
+      const response = await api.get("/transactions/export", {
+        responseType: "blob",
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "transactions.csv");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      console.error("Error descargando CSV:", err);
+    }
+  };
+
+  if (loading)
+    return (
+      <Box p={3} display="flex" justifyContent="center">
+        <CircularProgress />
+      </Box>
+    );
 
   const income = transactions
     .filter((t) => t.type === "INCOME")
@@ -50,6 +84,12 @@ export default function Reports() {
       <Typography variant="h4" mb={2}>
         Reportes
       </Typography>
+
+      <Stack direction="row" spacing={2} mb={3}>
+        <Button variant="contained" color="primary" onClick={handleDownloadCsv}>
+          Descargar CSV
+        </Button>
+      </Stack>
 
       <Paper sx={{ p: 3, mb: 3 }}>
         <Typography variant="h6">Distribución Ingresos vs Gastos</Typography>

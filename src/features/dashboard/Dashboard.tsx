@@ -21,7 +21,6 @@ import {
   Cell,
 } from "recharts";
 
-/** Tipos esperados del backend */
 interface Summary {
   incomes: number;
   expenses: number;
@@ -31,7 +30,6 @@ interface TransactionResponse {
   items: Transaction[];
 }
 
-/** Tarjeta KPI simple y reusable */
 function KPICard({
   title,
   value,
@@ -69,13 +67,11 @@ export default function Dashboard() {
   const summary = summaryQ.data ?? { incomes: 0, expenses: 0 };
   const transactions: Transaction[] = txQ.data?.items ?? [];
 
-  // construir últimos 6 meses YYYY-MM
   const months = Array.from({ length: 6 }).map((_, i) => {
     const date = subMonths(new Date(), 5 - i);
     return format(date, "yyyy-MM");
   });
 
-  // series por mes (para la línea)
   const series = months.map((m) => {
     const [y, mo] = m.split("-");
     const monthTx = transactions.filter((t) => t.date.startsWith(`${y}-${mo}`));
@@ -100,7 +96,6 @@ export default function Dashboard() {
         Resumen
       </Typography>
 
-      {/* KPIs: CSS Grid responsive */}
       <Box
         sx={{
           display: "grid",
@@ -114,7 +109,6 @@ export default function Dashboard() {
         <KPICard title="Balance" value={(summary.incomes ?? 0) - (summary.expenses ?? 0)} color="#0ea5a4" />
       </Box>
 
-      {/* Charts area: grid que se adapta */}
       <Box
         sx={{
           display: "grid",
@@ -122,7 +116,6 @@ export default function Dashboard() {
           gridTemplateColumns: { xs: "1fr", md: "2fr 1fr" },
         }}
       >
-        {/* Line Chart - ocupa la columna grande */}
         <Paper sx={{ p: 2, minHeight: 380 }}>
           <Typography variant="h6" mb={2}>
             Ingresos y Gastos (últimos 6 meses)
@@ -139,7 +132,6 @@ export default function Dashboard() {
           </ResponsiveContainer>
         </Paper>
 
-        {/* Pie Chart - columna pequeña */}
         <Paper sx={{ p: 2, minHeight: 380 }}>
           <Typography variant="h6" mb={2}>
             Distribución Ingresos vs Gastos

@@ -11,8 +11,7 @@ const drawerWidth = 240;
 const navItems = [
   { label: "Dashboard", path: "/", icon: <DashboardIcon /> },
   { label: "Transacciones", path: "/transactions", icon: <ListAltIcon /> },
-  { label: "Reportes", path: "/reports", icon: <PieChartIcon /> },
-  { label: "Configuración", path: "/profile", icon: <SettingsIcon /> },
+  { label: "Reportes", path: "/reports", icon: <PieChartIcon /> }
 ];
 
 export default function Sidebar() {

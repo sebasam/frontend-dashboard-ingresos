@@ -6,6 +6,7 @@ import Register from "./features/auth/Register";
 import Dashboard from "./features/dashboard/Dashboard";
 import TransactionsList from "./pages/Transactions/TransactionsList";
 import TransactionPage from "./pages/Transactions/TransactionsPage";
+import TransactionsPage from "./pages/Transactions/TransactionsPage";
 import Reports from "./features/reports/Reports";
 import type { JSX } from "react";
 
@@ -17,11 +18,9 @@ function PrivateRoute({ children }: { children: JSX.Element }) {
 export default function App() {
   return (
     <Routes>
-      {/* Rutas públicas */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
-      {/* Rutas privadas */}
       <Route
         path="/"
         element={
@@ -32,7 +31,7 @@ export default function App() {
       >
         <Route index element={<Dashboard />} />
         <Route path="transactions" element={<TransactionsList />} />
-        <Route path="transactions/new" element={<TransactionPage />} />
+        <Route path="transactions/new" element={<TransactionsPage />} />
         <Route path="transactions/:id/edit" element={<TransactionPage />} />
         <Route path="reports" element={<Reports />} />
       </Route>
