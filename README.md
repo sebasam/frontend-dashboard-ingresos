@@ -1,69 +1,84 @@
-# React + TypeScript + Vite
+# Frontend Dashboard Ingresos
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend de la aplicación **Dashboard de Ingresos y Gastos**, encargado de mostrar, crear, editar y reportar transacciones de manera visual.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Tecnologías utilizadas
 
-## Expanding the ESLint configuration
+| Tecnología | Propósito |
+|------------|-----------|
+| **React** | Biblioteca para construir interfaces de usuario reactivas y componentes reutilizables. |
+| **TypeScript** | Tipado estático para mayor seguridad y autocompletado en el desarrollo. |
+| **Vite** | Herramienta de bundling rápida para desarrollo y producción. |
+| **MUI (Material-UI)** | Biblioteca de componentes UI para estilos consistentes y responsivos. |
+| **React Router** | Manejo de rutas SPA para navegar entre páginas de transacciones y reportes. |
+| **Recharts** | Librería para gráficos (Pie, Bar) de ingresos vs gastos y transacciones por fecha. |
+| **Axios** | Cliente HTTP para conectarse al backend y consumir APIs. |
+| **zustand** (si se usa) | Manejo de estado global de autenticación o filtros. |
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+---
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Arquitectura y Patrones de Diseño
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+1. **Separación por componentes**
+   - **Pages:** Componentes de página (TransactionsList, TransactionsPage, Reports).  
+   - **Components:** Inputs, botones, formularios reutilizables, tablas y gráficas.  
+   - **Services:** Lógica de conexión con el backend (API REST).  
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+2. **Patrones implementados**
+   - **Container / Presentational:** Pages actúan como contenedores, mientras Components como presentacionales.  
+   - **Service Layer:** Funciones de `transactionService` centralizan las llamadas HTTP, evitando duplicar lógica en componentes.  
+   - **Hooks y Efectos:** `useEffect` para cargar datos y sincronizar el estado con el backend.  
+   - **Controlled Components:** Formularios controlados para manejar inputs de manera predecible.  
+
+3. **Principios de desarrollo**
+   - **POO y modularidad:** Aunque React es funcional, se usan **objetos y tipos** en TypeScript para estructurar datos (`Transaction`, `TransactionResponse`).  
+   - **DRY:** Componentes reutilizables y servicios centralizados.  
+   - **SOLID:**
+     - **S (Single Responsibility):** Cada componente tiene una responsabilidad clara.  
+     - **O (Open/Closed):** Los componentes se pueden extender (props) sin modificar el código interno.  
+     - **L (Liskov Substitution):** Components intercambiables usando props tipadas.  
+     - **I (Interface Segregation):** Props específicas para cada componente, evitando interfaces enormes.  
+     - **D (Dependency Inversion):** Components dependen de abstracciones (services) en vez de implementaciones concretas de API.  
+
+---
+
+
+---
+
+## Funcionalidades
+
+- **Transacciones**
+  - Crear, editar y eliminar transacciones.
+  - Campos: tipo, monto, fecha, categoría opcional, descripción opcional.
+- **Listados**
+  - Tabla de transacciones con paginación y filtros (opcional).
+  - Botones para editar y eliminar cada transacción.
+- **Reportes**
+  - Pie chart de ingresos vs gastos.
+  - Bar chart de transacciones por fecha.
+  - Botón para exportar CSV desde el backend.
+- **Autenticación**
+  - JWT almacenado en localStorage.
+  - Interceptor de Axios agrega token a cada request.
+
+---
+
+## Instalación y ejecución
+
+1. Clonar el repositorio:
+
+```bash
+git clone https://github.com/sebasam/frontend-dashboard-ingresos
+cd frontend-dashboard-ingresos
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+2. Ejecutar servidor de desarrollo:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run dev
 ```
+
+
