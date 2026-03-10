@@ -9,6 +9,13 @@ export interface Transaction {
   date: string;
 }
 
+export interface TransactionResponse {
+  items: Transaction[];
+  total?: number;
+  page?: number;
+  perPage?: number;
+}
+
 export const getTransactions = async (params?: Record<string, any>) => {
   const res = await api.get("/transactions", { params });
   return res.data;

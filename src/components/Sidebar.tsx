@@ -1,9 +1,7 @@
-import React from "react";
 import { Drawer, List, ListItemButton, ListItemIcon, ListItemText, Toolbar, Divider, Box } from "@mui/material";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import PieChartIcon from "@mui/icons-material/PieChart";
-import SettingsIcon from "@mui/icons-material/Settings";
 import { NavLink } from "react-router-dom";
 
 const drawerWidth = 240;

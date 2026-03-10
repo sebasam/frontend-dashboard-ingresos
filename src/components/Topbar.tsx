@@ -1,6 +1,5 @@
 import React from "react";
 import { AppBar, Toolbar, IconButton, Typography, Box, Avatar, Menu, MenuItem } from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
 import { useAuthStore } from "../store/authStore";
 import { useNavigate } from "react-router-dom";
 
